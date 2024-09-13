@@ -1,11 +1,12 @@
 const express = require('express');
 const { createTodo, updateTodo } = require('./type');
+const { Todo } = require('./db');
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.post("/todo", (req, res) => {
+app.post("/todo", async(req, res) => {
     const createPayload = req.body;
     const validatePayload = createTodo.safeParse(createPayload);
     if(!validatePayload.success){
@@ -13,13 +14,26 @@ app.post("/todo", (req, res) => {
            msg : "You have sent wrong input"
         })
     }
-    // store the data in the database
+    await Todo.create({
+        title : validatePayload.title,
+        description : validatePayload.description,
+        completed : false
+    })
+    res.send.json({
+        msg : "Todo created successfully"
+    })
 })
 
-app.get("/todos", (req, res) => {
+app.get("/todos", async(req, res) => {
+    const todo = await Todo.find({});
+
+    res.json({
+        msg : "Todo fetched successfully",
+        data : todo
+    })
 })
 
-app.put('/completed', (req, res) => {
+app.put('/completed',async (req, res) => {
     const updatePayload = req.body;
     const validatePayload = updateTodo.safeParse(updatePayload);
     if(!validatePayload.success){
@@ -27,7 +41,15 @@ app.put('/completed', (req, res) => {
             msg : "You have sent wrong input"
         })
     }
-    // store the data in the database
+    const todo = await Todo.update({
+        _id : req.body.id
+    }, {
+        completed : true
+    })
+    res.json({
+        msg : "Todo updated successfully",
+        data : todo
+    })
 })
 
 app.listen(port, () => {
