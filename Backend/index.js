@@ -15,18 +15,17 @@ app.post("/todo", async(req, res) => {
         })
     }
     await Todo.create({
-        title : validatePayload.title,
-        description : validatePayload.description,
+        title : validatePayload.data.title,
+        description : validatePayload.data.description,
         completed : false
     })
-    res.send.json({
+    res.json({
         msg : "Todo created successfully"
     })
 })
 
 app.get("/todos", async(req, res) => {
     const todo = await Todo.find({});
-
     res.json({
         msg : "Todo fetched successfully",
         data : todo
@@ -41,7 +40,7 @@ app.put('/completed',async (req, res) => {
             msg : "You have sent wrong input"
         })
     }
-    const todo = await Todo.update({
+    const todo = await Todo.updateOne({
         _id : req.body.id
     }, {
         completed : true
